@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -10,6 +9,7 @@ import (
 	"os"
 
 	"github.com/mosajjal/emerald/dmarc"
+	"github.com/mosajjal/emerald/dns"
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/spf13/cobra"
@@ -52,9 +52,10 @@ var dmarcParse = &cobra.Command{
 		}
 
 		newReport, _ := dmarc.New(f)
-		j, _ := json.MarshalIndent(newReport, "", "  ")
+		dns.PrettyPrint(newReport, os.Stdout)
 
-		fmt.Printf("%s", j)
+		//j, _ := json.MarshalIndent(newReport, "", "  ")
+		//fmt.Printf("%s", j)
 	},
 }
 

@@ -4,7 +4,8 @@ import (
 	"context"
 	"net"
 	"strings"
-	"time"
+
+	"github.com/mosajjal/emerald/dns"
 )
 
 // Query function takes a top level domain name (google.com) and
@@ -16,25 +17,5 @@ func Query(ctx context.Context, domain string, server net.IP) (output string, er
 		domain = "_dmarc." + domain
 	}
 	domain = strings.TrimSuffix(domain, ".")
-
-	resolver := net.DefaultResolver
-
-	if !server.Equal(net.IPv4zero) {
-		resolver = &net.Resolver{
-			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-				d := net.Dialer{
-					Timeout: time.Millisecond * time.Duration(10000),
-				}
-				return d.DialContext(ctx, network, address+":53")
-			},
-		}
-	}
-
-	if r, e := resolver.LookupTXT(ctx, domain); e == nil {
-		output = r[0]
-	} else {
-		err = e
-	}
-	return
+	return dns.QueryTXT(ctx, domain, server)
 }

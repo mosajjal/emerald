@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"net"
+	"os"
 
 	"github.com/mosajjal/emerald/dkim"
+	"github.com/mosajjal/emerald/dns"
 	"github.com/spf13/cobra"
 )
 
@@ -22,8 +23,12 @@ var dkimQuery = &cobra.Command{
 	Long:  "performs a DNS query to a domain's dkim record and parses the output.",
 	Run: func(cmd *cobra.Command, args []string) {
 		//todo: write this in dkim's own package and call it from here
-		r, _ := dkim.Query(context.Background(), inputDomain, dkimSelector, net.IPv4zero)
-		fmt.Println(r)
+		d := dkim.New(inputDomain, dkimSelector)
+		d.Query(context.Background(), net.IPv4zero)
+		// r, _ := dkim.Query(context.Background(), inputDomain, dkimSelector, net.IPv4zero)
+		d.Parse()
+		// fmt.Printf("%+v", d)
+		dns.PrettyPrint(d, os.Stdout, "desc")
 	},
 }
 

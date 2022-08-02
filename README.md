@@ -41,3 +41,11 @@
 - Pretty colorful (default)
 - Pretty raw
 - STIXX
+
+
+
+
+Ideas:
+
+generate the appropiate DKIM query to test against an EML file for DKIM 
+

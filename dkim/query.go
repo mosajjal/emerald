@@ -4,37 +4,82 @@ import (
 	"context"
 	"net"
 	"strings"
-	"time"
+
+	"github.com/mosajjal/emerald/dns"
 )
+
+type Dkim struct {
+	D   string `desc:"indicates the domain used with the selector record (s=) to locate the public key"`
+	S   string `desc:"indicates the selector record name used with the domain to locate the public key in DNS. The value is a name or number created by the sender"`
+	V   string `desc:"is the version of the DKIM record. The value must be DKIM1 and be the first tag in the DNS record. Recommended Optional"`
+	K   string `desc:"indicates the key type. The default value is rsa which must be supported by both signers and verifiers."`
+	T   string `desc:"indicates the domain is testing DKIM or is enforcing a domain match in the signature header between the i and d tags. Recommended Optional"`
+	G   string `desc:"is the granularity of the public key. Optional"`
+	H   string `desc:"indicates which hash algorithms are acceptable. Optional"`
+	N   string `desc:"is a note field intended for administrators, not end users. Optional"`
+	P   string `desc:"indicates the public key of the DKIM record. Required"`
+	txt string `desc:"raw TXT response"`
+}
+
+func New(domain string, selector string) Dkim {
+	if strings.HasPrefix(domain, selector) {
+		domain = strings.TrimPrefix(domain, selector)
+	}
+	domain = strings.TrimSuffix(domain, ".")
+	// todo: probably more work needed here to be sure domain and prefix are clean
+	return Dkim{D: domain, S: selector}
+}
 
 // Query function takes a top level domain name (google.com) and
 // returns the dkim TXT record associated with it. it uses the
 // system's resolver if server is provided as 0.0.0.0 otherwise
 // it'll explicity query from the requested server.
-func Query(ctx context.Context, domain string, selector string, server net.IP) (output string, err error) {
-	if !strings.HasPrefix(domain, "_domainkey.") {
-		domain = selector + "._domainkey." + domain
-	}
-	domain = strings.TrimSuffix(domain, ".")
+func (d *Dkim) Query(ctx context.Context, server net.IP) error {
+	fqdn := d.S + "._domainkey." + d.D
+	res, err := dns.QueryTXT(ctx, fqdn, server)
+	d.txt = res
+	return err
+}
 
-	resolver := net.DefaultResolver
+// Parse function gets the raw TXT query and populates the fields of a DKIM response
+// it also checks for errors in the response
+func (d *Dkim) Parse() error {
+	// sample: v=DKIM1; k=rsa; p=KfqqK25Nvy5Gc7t8uGgHW3jJpTxALJqwQIDAQAB
+	// ";" looks to be the best way to split the response. All the tests
+	// showed that ; is always followed by a space, but we can trim that
+	dkimParts := strings.Split(d.txt, ";")
+	for _, kv := range dkimParts {
+		// trim the whitespace
+		kv = strings.TrimSpace(kv)
 
-	if !server.Equal(net.IPv4zero) {
-		resolver = &net.Resolver{
-			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-				d := net.Dialer{
-					Timeout: time.Millisecond * time.Duration(10000),
-				}
-				return d.DialContext(ctx, network, address+":53")
-			},
+		// we need to split kv by = to get k and v individually
+		tmp := strings.SplitN(kv, "=", 2)
+		key, value := tmp[0], tmp[1]
+
+		switch key {
+		case "v":
+			d.V = value
+		case "k":
+			d.K = value
+		case "p":
+			d.P = value
+		case "h":
+			d.H = value
+		case "t":
+			d.T = value
+		case "n":
+			d.N = value
+		default:
+			// todo: unexpected value, should throw a warning at least
 		}
+
 	}
 
-	if r, e := resolver.LookupTXT(ctx, domain); e == nil {
-		output = r[0]
-	} else {
-		err = e
-	}
-	return
+	return nil
+}
+
+// String function returns the raw TXT response
+func (d *Dkim) String() string {
+
+	return d.txt
 }
