@@ -15,7 +15,7 @@ func init() {
 }
 
 var mxCmd = &cobra.Command{
-	Use:   "MX",
+	Use:   "mx",
 	Short: "MX related commands",
 	Long:  `MX`,
 }
@@ -33,7 +33,7 @@ var mxQuery = &cobra.Command{
 				os.Stdout.Write(bytes)
 			}
 		} else {
-			fmt.Println("error")
+			fmt.Println(err.Error())
 		}
 	},
 }

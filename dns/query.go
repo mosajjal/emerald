@@ -3,6 +3,7 @@ package dns
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/url"
 	"strings"
@@ -34,16 +35,24 @@ func (d DnsClient) QueryTXT(ctx context.Context, fqdn string) ([]mkdns.RR, error
 }
 
 func (d DnsClient) performQuery(q *mkdns.Msg) (responses []mkdns.RR, err error) {
+
 	fnDone := make(chan bool)
 	go func() {
 		co := &mkdns.Conn{Conn: d.C}
 		if err = co.WriteMsg(q); err != nil {
 			fnDone <- true
 		}
-		r, err := co.ReadMsg()
+		var r *mkdns.Msg
+		r, err = co.ReadMsg()
 		co.Close()
 		if err == nil {
-			responses = r.Answer
+			if r.Truncated {
+				err = fmt.Errorf("response was truncated. consider using a different protocol (TCP) for large queries")
+			} else if r.Id == q.Id {
+				responses = r.Answer
+			} else {
+				err = fmt.Errorf("%d", r.Id)
+			}
 		}
 		fnDone <- true
 	}()
@@ -64,26 +73,44 @@ func NewDnsClient(ctx context.Context, server string) (DnsClient, error) {
 
 	if err == nil {
 		switch dnsUrl.Scheme {
-		case "udp":
-			//TODO: build ipv6 support here
+		case "udp", "udp4":
 			s, err := net.ResolveUDPAddr("udp4", dnsUrl.Host)
 			if err == nil {
 				c.C, err = net.DialUDP("udp4", nil, s)
 				return c, err
 			}
 			return c, err
-		case "tcp":
-			//TODO: build ipv6 support here
+		case "udp6":
+			s, err := net.ResolveUDPAddr("udp6", dnsUrl.Host)
+			if err == nil {
+				c.C, err = net.DialUDP("udp6", nil, s)
+				return c, err
+			}
+			return c, err
+		case "tcp", "tcp4":
 			s, err := net.ResolveTCPAddr("tcp4", dnsUrl.Host)
 			if err == nil {
 				c.C, err = net.DialTCP("tcp4", nil, s)
 				return c, err
 			}
 			return c, err
-		case "tls":
+		case "tcp6":
+			s, err := net.ResolveTCPAddr("tcp6", dnsUrl.Host)
+			if err == nil {
+				c.C, err = net.DialTCP("tcp6", nil, s)
+				return c, err
+			}
+			return c, err
+		case "tls", "tls4":
 			// s, err := net.ResolveTCPAddr("tcp4", dnsUrl.Host)
 			if err == nil {
 				c.C, err = tls.Dial("tcp4", dnsUrl.Host, &tls.Config{})
+				return c, err
+			}
+		case "tls6":
+			// s, err := net.ResolveTCPAddr("tcp4", dnsUrl.Host)
+			if err == nil {
+				c.C, err = tls.Dial("tcp6", dnsUrl.Host, &tls.Config{})
 				return c, err
 			}
 		}
