@@ -14,3 +14,7 @@ emerald
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+
+# new TODO list
+.TODO.md
