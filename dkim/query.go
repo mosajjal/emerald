@@ -47,10 +47,14 @@ func (d *DKIM) Query(ctx context.Context, server string) error {
 	if err != nil {
 		return err
 	}
-	res, err := c.QueryMX(ctx, fqdn)
-	//TODO: handle multiple responses
-	d.txt = res[0].String()
-	return d.parseQuery()
+	res, err := c.QueryTXT(ctx, fqdn)
+	if len(res) > 0 {
+		d.txt = res[0].String()
+		// TODO: if the response is a CNAME to another query, that should be handled here
+		return d.parseQuery()
+	} else {
+		return fmt.Errorf("No DKIM record found")
+	}
 }
 
 // parseQuery function gets the raw TXT query and populates the fields of a DKIM response
