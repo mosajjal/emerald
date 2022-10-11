@@ -10,11 +10,12 @@ The following are implemented
 - Query DMARC of a domain and display the parsed output
 - Parse DMARC XML report from .xml, .zip and .gz formats
 
+
 ### DKIM
 - Query DKIM of a domain and display the parsed output
 
 ### SPF
-- Query SPF of a domain and display the parsed output (WIP)
+- Query SPF of a domain and display the parsed output
 
 ### MX
 - Query MX of a domain and display the parsed output

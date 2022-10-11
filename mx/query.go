@@ -21,8 +21,8 @@ type mxRecord struct {
 }
 
 type MX struct {
-	QueryDomain string
-	Records     []mxRecord
+	QueryDomain string     `desc:"Queried Domain"`
+	Records     []mxRecord `desc:"List of MX records returned"`
 }
 
 // Query function takes a top level domain name (google.com) and
