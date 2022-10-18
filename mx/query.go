@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 
 	mkdns "github.com/miekg/dns"
+	"github.com/mosajjal/dnsclient"
 	"github.com/mosajjal/emerald/dns"
 	"gopkg.in/yaml.v3"
 )
@@ -30,11 +31,12 @@ type MX struct {
 // system's resolver if server is provided as 0.0.0.0 otherwise
 // it'll explicity query from the requested server.
 func (mx *MX) Query(ctx context.Context, server string) (err error) {
-	c, err := dns.NewDnsClient(ctx, server)
+	c, err := dnsclient.New(server, true)
+
 	if err != nil {
 		return err
 	}
-	responses, err := c.QueryMX(ctx, mx.QueryDomain)
+	responses, _, err := dns.QueryMX(ctx, c, mx.QueryDomain)
 	for _, r := range responses {
 		if t, ok := r.(*mkdns.MX); ok {
 			tmpMxRecord := mxRecord{}

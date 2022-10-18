@@ -15,6 +15,8 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/mosajjal/emerald/dns"
+
+	"github.com/mosajjal/dnsclient"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
 )
@@ -52,11 +54,12 @@ func Query(ctx context.Context, domain string, server string) (d BimiDns, img im
 		domain = "default._bimi." + domain
 	}
 	domain = strings.TrimSuffix(domain, ".")
-	c, err := dns.NewDnsClient(ctx, server)
+	// c, err := dns.NewDnsClient(ctx, server)
+	c, err := dnsclient.New(server, true)
 	if err != nil {
 		return
 	}
-	responses, err := c.QueryTXT(ctx, domain)
+	responses, _, err := dns.QueryTXT(ctx, c, domain)
 	if err != nil {
 		return
 	}

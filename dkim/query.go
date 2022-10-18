@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/mosajjal/dnsclient"
 	"github.com/mosajjal/emerald/dns"
 	"gopkg.in/yaml.v3"
 )
@@ -42,12 +43,17 @@ func New(domain string, selector string) DKIM {
 // system's resolver if server is provided as 0.0.0.0 otherwise
 // it'll explicity query from the requested server.
 func (d *DKIM) Query(ctx context.Context, server string) error {
-	c, err := dns.NewDnsClient(ctx, server)
-	fqdn := d.S + "._domainkey." + d.D
+	// c, err := dns.NewDnsClient(ctx, server)
+	c, err := dnsclient.New(server, true)
 	if err != nil {
 		return err
 	}
-	res, err := c.QueryTXT(ctx, fqdn)
+	fqdn := d.S + "._domainkey." + d.D
+
+	res, _, err := dns.QueryTXT(ctx, c, fqdn)
+	if err != nil {
+		return err
+	}
 	if len(res) > 0 {
 		d.txt = res[0].String()
 		// TODO: if the response is a CNAME to another query, that should be handled here

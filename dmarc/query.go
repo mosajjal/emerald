@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	mkdns "github.com/miekg/dns"
+	"github.com/mosajjal/dnsclient"
 	"github.com/mosajjal/emerald/dns"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -35,11 +36,15 @@ func Query(ctx context.Context, domain string, server string) (d DmarcDns, err e
 		domain = "_dmarc." + domain
 	}
 	domain = strings.TrimSuffix(domain, ".")
-	c, err := dns.NewDnsClient(ctx, server)
+	// c, err := dns.NewDnsClient(ctx, server)
+	c, err := dnsclient.New(server, true)
+
 	if err != nil {
 		return
 	}
-	responses, err := c.QueryTXT(ctx, domain)
+	// responses, err := c.QueryTXT(ctx, domain)
+	responses, _, err := dns.QueryTXT(ctx, c, domain)
+
 	if len(responses) == 0 {
 		return d, fmt.Errorf("no DMARC response")
 	}

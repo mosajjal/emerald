@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	mkdns "github.com/miekg/dns"
+	"github.com/mosajjal/dnsclient"
 	"github.com/mosajjal/emerald/dns"
 	"gopkg.in/yaml.v3"
 )
@@ -28,12 +29,14 @@ type SpfRecord struct {
 // system's resolver if server is provided as 0.0.0.0 otherwise
 // it'll explicity query from the requested server.
 func (s *SpfRecord) Query(ctx context.Context, server string) (err error) {
-	c, err := dns.NewDnsClient(ctx, server)
+	c, err := dnsclient.New(server, true)
+
 	if err != nil {
 		return err
 	}
 	// since TXT response will be multiple lines, the one with v=spf* will be the SPF record.
-	responses, err := c.QueryTXT(ctx, s.QueryDomain)
+	responses, _, err := dns.QueryTXT(ctx, c, s.QueryDomain)
+
 	if err != nil {
 		return err
 	}
