@@ -62,6 +62,9 @@ func Query(ctx context.Context, domain string, server string) (d BimiDns, img im
 	responses, _, err := dns.QueryTXT(ctx, c, domain)
 	if err != nil {
 		return
+	} else if len(responses) < 1 {
+		err = fmt.Errorf("No BIMI record found")
+		return
 	}
 	// parse TXT response and grab the URL if exists (l=https://bimigroup.org/bimi-sq.svg;)
 	//TODO: in next line we only take the first output into account, there might be a chance
