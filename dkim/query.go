@@ -44,7 +44,7 @@ func New(domain string, selector string) DKIM {
 // it'll explicity query from the requested server.
 func (d *DKIM) Query(ctx context.Context, server string) error {
 	// c, err := dns.NewDnsClient(ctx, server)
-	c, err := dnsclient.New(server, true)
+	c, err := dnsclient.New(server, true, "")
 	if err != nil {
 		return err
 	}

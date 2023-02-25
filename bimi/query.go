@@ -55,7 +55,7 @@ func Query(ctx context.Context, domain string, server string) (d BimiDns, img im
 	}
 	domain = strings.TrimSuffix(domain, ".")
 	// c, err := dns.NewDnsClient(ctx, server)
-	c, err := dnsclient.New(server, true)
+	c, err := dnsclient.New(server, true, "")
 	if err != nil {
 		return
 	}

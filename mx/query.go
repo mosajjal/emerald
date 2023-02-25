@@ -31,7 +31,7 @@ type MX struct {
 // system's resolver if server is provided as 0.0.0.0 otherwise
 // it'll explicity query from the requested server.
 func (mx *MX) Query(ctx context.Context, server string) (err error) {
-	c, err := dnsclient.New(server, true)
+	c, err := dnsclient.New(server, true, "")
 
 	if err != nil {
 		return err
