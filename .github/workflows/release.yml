@@ -16,16 +16,15 @@ jobs:
           - goarch: "386"
             goos: darwin
           - goarch: "arm"
-            goos: darwin  
+            goos: darwin
     steps:
     - uses: actions/checkout@v2
     - uses: wangyoucao577/go-release-action@master
       env:
-        CGO_ENABLED: 0 
+        CGO_ENABLED: 0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: ./cmd/emerald/
-        goversion: 1.19
-        
+        goversion: 1.21
