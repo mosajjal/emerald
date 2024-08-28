@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	mkdns "github.com/miekg/dns"
 	"github.com/mosajjal/dnsclient"
@@ -62,9 +61,9 @@ func (mx MX) Marshal(kind string) ([]byte, error) {
 		var b bytes.Buffer
 		_ = io.Writer(&b)
 		dns.PrettyPrint(mx, &b, "desc")
-		return ioutil.ReadAll(&b)
+		return io.ReadAll(&b)
 	case "STIX":
 		return nil, fmt.Errorf("STIX has not been implemented yet")
 	}
-	return nil, fmt.Errorf("Unknown kind: %s", kind)
+	return nil, fmt.Errorf("unknown kind: %s", kind)
 }

@@ -42,7 +42,8 @@ func StructFormatter(myStruct any, tags ...string) (rows []table.Row) {
 				}
 
 			case reflect.Struct:
-				childStruct := reflect.Indirect(reflect.ValueOf(myStruct)).FieldByName(tv.Field(i).Name).Interface()
+				childStruct := reflect.Indirect(reflect.ValueOf(myStruct)).
+					FieldByName(tv.Field(i).Name).Interface()
 				// Tags of child structs are not supported
 				for _, r := range StructFormatter(childStruct) {
 					tmpRow := append(row, r...)
@@ -85,8 +86,12 @@ func PrettyPrint(myStruct any, w io.Writer, tags ...string) {
 	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
 	t.AppendRows(rows, rowConfigAutoMerge)
 
-	t.SetColumnConfigs([]table.ColumnConfig{{Number: 1, Transformer: wrap, AutoMerge: true}, {Number: 2, Transformer: wrap, AutoMerge: true}, {Number: 3, Transformer: wrap, AutoMerge: true}})
-	// todo: style needs to change when the output is not a TTY
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, Transformer: wrap, AutoMerge: true},
+		{Number: 2, Transformer: wrap, AutoMerge: true},
+		{Number: 3, Transformer: wrap, AutoMerge: true},
+	})
+	// TODO: Style needs to change when the output is not a TTY
 	// t.SetStyle(table.StyleColoredBright)
 	t.SetStyle(table.StyleLight)
 	t.Style().Options.SeparateRows = true

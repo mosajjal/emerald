@@ -6,7 +6,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 
 	"github.com/mosajjal/emerald/dns"
@@ -122,9 +121,9 @@ func (afrf AfrfReport) Marshal(kind string) ([]byte, error) {
 		var b bytes.Buffer
 		_ = io.Writer(&b)
 		dns.PrettyPrint(afrf, &b, "desc")
-		return ioutil.ReadAll(&b)
+		return io.ReadAll(&b)
 	case "STIX":
 		return nil, fmt.Errorf("STIX has not been implemented yet")
 	}
-	return nil, fmt.Errorf("Unknown kind: %s", kind)
+	return nil, fmt.Errorf("unknown kind: %s", kind)
 }

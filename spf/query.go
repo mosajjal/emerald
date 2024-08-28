@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"strings"
 
@@ -69,7 +68,7 @@ func (s *SpfRecord) Query(ctx context.Context, server string) (err error) {
 					}
 				}
 			} else {
-				return fmt.Errorf("Can't parse MX response")
+				return fmt.Errorf("can't parse the MX response")
 			}
 		}
 	}
@@ -87,9 +86,9 @@ func (s SpfRecord) Marshal(kind string) ([]byte, error) {
 		var b bytes.Buffer
 		_ = io.Writer(&b)
 		dns.PrettyPrint(s, &b, "desc")
-		return ioutil.ReadAll(&b)
+		return io.ReadAll(&b)
 	case "STIX":
 		return nil, fmt.Errorf("STIX has not been implemented yet")
 	}
-	return nil, fmt.Errorf("Unknown kind: %s", kind)
+	return nil, fmt.Errorf("unknown kind: %s", kind)
 }

@@ -8,12 +8,14 @@ import (
 	"github.com/nfnt/resize"
 )
 
+// scale is used to resize an image while preserving the aspect ratio. currently unused
 func scale(img image.Image, w int) (image.Image, int, int) {
 	sz := img.Bounds()
 	h := (sz.Max.Y * w * 10) / (sz.Max.X * 16)
 	img = resize.Resize(uint(w), uint(h), img, resize.Lanczos3)
 	return img, w, h
 }
+
 func convertColorToRGB(col color.Color) (uint8, uint8, uint8) {
 	rgbaColor := color.RGBAModel.Convert(col)
 	_r, _g, _b, _ := rgbaColor.RGBA()

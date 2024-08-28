@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -105,9 +104,9 @@ func (d DmarcDns) Marshal(kind string) ([]byte, error) {
 		var b bytes.Buffer
 		_ = io.Writer(&b)
 		dns.PrettyPrint(d, &b, "desc")
-		return ioutil.ReadAll(&b)
+		return io.ReadAll(&b)
 	case "STIX":
 		return nil, fmt.Errorf("STIX has not been implemented yet")
 	}
-	return nil, fmt.Errorf("Unknown kind: %s", kind)
+	return nil, fmt.Errorf("unknown kind: %s", kind)
 }

@@ -31,7 +31,13 @@ var dmarcParse = &cobra.Command{
 	Long:  `used to parse any DMARC XML reports in .xml, .zip or .gz formats`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mtype, err := mimetype.DetectFile(inputFile)
+		if err != nil {
+			log.Fatalln("filetype cannot be detected. exiting")
+		}
 		file, err := os.OpenFile(inputFile, os.O_RDONLY, os.FileMode(0o755))
+		if err != nil {
+			log.Fatalln("cannot open the file, exiting")
+		}
 		defer file.Close()
 		if err != nil {
 			log.Fatalln(err)

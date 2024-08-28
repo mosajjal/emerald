@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 
 	"github.com/mosajjal/dnsclient"
@@ -30,9 +29,7 @@ type DKIM struct {
 
 // New creates a new DKIM record based on a domain and selector
 func New(domain string, selector string) DKIM {
-	if strings.HasPrefix(domain, selector) {
-		domain = strings.TrimPrefix(domain, selector)
-	}
+	domain = strings.TrimPrefix(domain, selector)
 	domain = strings.TrimSuffix(domain, ".")
 	// todo: probably more work needed here to be sure domain and prefix are clean
 	return DKIM{D: domain, S: selector}
@@ -59,7 +56,7 @@ func (d *DKIM) Query(ctx context.Context, server string) error {
 		// TODO: if the response is a CNAME to another query, that should be handled here
 		return d.parseQuery()
 	} else {
-		return fmt.Errorf("No DKIM record found")
+		return fmt.Errorf("no DKIM record found")
 	}
 }
 
@@ -77,7 +74,7 @@ func (d *DKIM) parseQuery() error {
 		// we need to split kv by = to get k and v individually
 		tmp := strings.SplitN(kv, "=", 2)
 		if len(tmp) != 2 {
-			return fmt.Errorf("Wrong TXT response: %s", kv)
+			return fmt.Errorf("wrong TXT response: %s", kv)
 		}
 		key, value := tmp[0], tmp[1]
 
@@ -119,9 +116,9 @@ func (d DKIM) Marshal(kind string) ([]byte, error) {
 		var b bytes.Buffer
 		_ = io.Writer(&b)
 		dns.PrettyPrint(d, &b, "desc")
-		return ioutil.ReadAll(&b)
+		return io.ReadAll(&b)
 	case "STIX":
 		return nil, fmt.Errorf("STIX has not been implemented yet")
 	}
-	return nil, fmt.Errorf("Unknown kind: %s", kind)
+	return nil, fmt.Errorf("unknown kind: %s", kind)
 }
